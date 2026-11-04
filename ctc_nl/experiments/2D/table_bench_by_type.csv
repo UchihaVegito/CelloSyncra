@@ -1,0 +1,3 @@
+planner,backend,about_to_divide,above_median,box,count_all,count_region,divisions,superlative,topk_region
+openai-Qwen_Qwen2.5-72B-Instruct-AWQ,cpsam_pooled,0.204,0.808,0.921,0.2,0.55,0.467,0.508,0.797
+openai-Qwen_Qwen2.5-72B-Instruct-AWQ,oracle,0.983,1.0,1.0,1.0,1.0,1.0,1.0,0.989

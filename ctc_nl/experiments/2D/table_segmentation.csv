@@ -1,0 +1,7 @@
+,DET_F1,DET_F1,SEG,SEG,official_DET,official_SEG,official_TRA
+backend,cpsam_pooled,oracle,cpsam_pooled,oracle,cpsam_pooled,cpsam_pooled,cpsam_pooled
+dataset,,,,,,,
+DIC-C2DH-HeLa,0.941,1.0,0.848,0.965,0.912,0.848,0.908
+Fluo-N2DH-SIM+,0.633,1.0,0.41,1.0,0.583,0.41,0.575
+Fluo-N2DL-HeLa,0.945,1.0,0.885,0.909,0.977,0.885,0.972
+PhC-C2DH-U373,0.934,1.0,0.876,0.888,0.959,0.876,0.947

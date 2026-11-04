@@ -1,0 +1,3 @@
+planner,backend,DIC-C2DH-HeLa,Fluo-N2DH-SIM+,Fluo-N2DL-HeLa,PhC-C2DH-U373
+openai-Qwen_Qwen2.5-72B-Instruct-AWQ,cpsam_pooled,0.733,0.423,0.498,0.574
+openai-Qwen_Qwen2.5-72B-Instruct-AWQ,oracle,1.0,1.0,1.0,0.986

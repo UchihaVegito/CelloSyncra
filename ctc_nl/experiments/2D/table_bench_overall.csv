@@ -1,0 +1,3 @@
+planner,backend,n,score,exact,answered,steps,sec,count_rel_err
+openai-Qwen_Qwen2.5-72B-Instruct-AWQ,cpsam_pooled,480,0.557,0.329,1.0,4.112,4.479,0.086
+openai-Qwen_Qwen2.5-72B-Instruct-AWQ,oracle,480,0.997,0.996,1.0,4.104,4.208,0.0

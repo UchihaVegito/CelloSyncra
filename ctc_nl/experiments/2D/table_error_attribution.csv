@@ -1,0 +1,2 @@
+planner,backend,n,oracle_score,backend_score,planner_loss,segmentation_loss
+openai-Qwen_Qwen2.5-72B-Instruct-AWQ,cpsam_pooled,480,0.997,0.557,0.003,0.44

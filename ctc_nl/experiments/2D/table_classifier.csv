@@ -1,0 +1,5 @@
+dataset,macro_F1,balanced_acc,AUROC_dividing,AUPRC_dividing,prevalence_dividing,F1_dividing,F1_newborn
+DIC-C2DH-HeLa,0.667,0.669,0.928,0.48,0.016,0.486,0.533
+Fluo-N2DH-SIM+,0.566,0.728,0.956,0.781,0.027,0.559,0.261
+Fluo-N2DL-HeLa,0.571,0.642,0.808,0.22,0.017,0.176,0.587
+PhC-C2DH-U373,0.328,0.333,0.171,0.009,0.014,0.0,0.0
