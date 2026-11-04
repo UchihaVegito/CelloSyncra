@@ -1,0 +1,10 @@
+,DET_F1,DET_F1,SEG,SEG,official_DET,official_SEG,official_TRA
+backend,cpsam_joint,oracle,cpsam_joint,oracle,cpsam_joint,cpsam_joint,cpsam_joint
+dataset,,,,,,,
+DIC-C2DH-HeLa,0.94,1.0,0.853,0.965,0.911,0.853,0.908
+Fluo-C3DH-A549,0.048,1.0,0.361,0.991,0.0,0.361,0.0
+Fluo-C3DH-A549-SIM,0.192,1.0,0.67,1.0,0.16,0.67,0.231
+Fluo-C3DL-MDA231,0.384,1.0,0.104,0.752,0.355,0.072,0.344
+Fluo-N2DH-SIM+,0.572,1.0,0.363,1.0,0.519,0.363,0.513
+Fluo-N2DL-HeLa,0.956,1.0,0.877,0.909,0.978,0.877,0.973
+PhC-C2DH-U373,0.929,1.0,0.876,0.888,0.962,0.876,0.951

@@ -1,0 +1,280 @@
+{
+  "DIC-C2DH-HeLa": {
+    "01": {
+      "frames": 84,
+      "gold": 9,
+      "gold_slices": 0,
+      "silver": 84,
+      "tra": 84,
+      "tracks": 38,
+      "divisions": 10,
+      "shape": [
+        512,
+        512
+      ],
+      "ndim": 2,
+      "spacing": [
+        1.0,
+        1.0
+      ]
+    },
+    "02": {
+      "frames": 84,
+      "gold": 9,
+      "gold_slices": 0,
+      "silver": 84,
+      "tra": 84,
+      "tracks": 32,
+      "divisions": 8,
+      "shape": [
+        512,
+        512
+      ],
+      "ndim": 2,
+      "spacing": [
+        1.0,
+        1.0
+      ]
+    }
+  },
+  "Fluo-N2DH-SIM+": {
+    "01": {
+      "frames": 65,
+      "gold": 65,
+      "gold_slices": 0,
+      "silver": 0,
+      "tra": 65,
+      "tracks": 95,
+      "divisions": 31,
+      "shape": [
+        690,
+        628
+      ],
+      "ndim": 2,
+      "spacing": [
+        1.0,
+        1.0
+      ]
+    },
+    "02": {
+      "frames": 150,
+      "gold": 150,
+      "gold_slices": 0,
+      "silver": 0,
+      "tra": 150,
+      "tracks": 107,
+      "divisions": 46,
+      "shape": [
+        773,
+        739
+      ],
+      "ndim": 2,
+      "spacing": [
+        1.0,
+        1.0
+      ]
+    }
+  },
+  "Fluo-N2DL-HeLa": {
+    "01": {
+      "frames": 92,
+      "gold": 28,
+      "gold_slices": 0,
+      "silver": 92,
+      "tra": 92,
+      "tracks": 265,
+      "divisions": 94,
+      "shape": [
+        700,
+        1100
+      ],
+      "ndim": 2,
+      "spacing": [
+        1.0,
+        1.0
+      ]
+    },
+    "02": {
+      "frames": 92,
+      "gold": 8,
+      "gold_slices": 0,
+      "silver": 92,
+      "tra": 92,
+      "tracks": 674,
+      "divisions": 212,
+      "shape": [
+        700,
+        1100
+      ],
+      "ndim": 2,
+      "spacing": [
+        1.0,
+        1.0
+      ]
+    }
+  },
+  "PhC-C2DH-U373": {
+    "01": {
+      "frames": 115,
+      "gold": 15,
+      "gold_slices": 0,
+      "silver": 115,
+      "tra": 115,
+      "tracks": 8,
+      "divisions": 1,
+      "shape": [
+        520,
+        696
+      ],
+      "ndim": 2,
+      "spacing": [
+        1.0,
+        1.0
+      ]
+    },
+    "02": {
+      "frames": 115,
+      "gold": 19,
+      "gold_slices": 0,
+      "silver": 115,
+      "tra": 115,
+      "tracks": 12,
+      "divisions": 5,
+      "shape": [
+        520,
+        696
+      ],
+      "ndim": 2,
+      "spacing": [
+        1.0,
+        1.0
+      ]
+    }
+  },
+  "Fluo-C3DH-A549": {
+    "01": {
+      "frames": 30,
+      "gold": 15,
+      "gold_slices": 0,
+      "silver": 30,
+      "tra": 30,
+      "tracks": 1,
+      "divisions": 0,
+      "shape": [
+        29,
+        300,
+        350
+      ],
+      "ndim": 3,
+      "spacing": [
+        1.0,
+        0.126,
+        0.126
+      ]
+    },
+    "02": {
+      "frames": 30,
+      "gold": 15,
+      "gold_slices": 0,
+      "silver": 30,
+      "tra": 30,
+      "tracks": 1,
+      "divisions": 0,
+      "shape": [
+        28,
+        270,
+        400
+      ],
+      "ndim": 3,
+      "spacing": [
+        1.0,
+        0.126,
+        0.126
+      ]
+    }
+  },
+  "Fluo-C3DH-A549-SIM": {
+    "01": {
+      "frames": 30,
+      "gold": 30,
+      "gold_slices": 0,
+      "silver": 0,
+      "tra": 30,
+      "tracks": 1,
+      "divisions": 0,
+      "shape": [
+        29,
+        300,
+        350
+      ],
+      "ndim": 3,
+      "spacing": [
+        1.0,
+        0.126,
+        0.126
+      ]
+    },
+    "02": {
+      "frames": 30,
+      "gold": 30,
+      "gold_slices": 0,
+      "silver": 0,
+      "tra": 30,
+      "tracks": 1,
+      "divisions": 0,
+      "shape": [
+        37,
+        300,
+        400
+      ],
+      "ndim": 3,
+      "spacing": [
+        1.0,
+        0.126,
+        0.126
+      ]
+    }
+  },
+  "Fluo-C3DL-MDA231": {
+    "01": {
+      "frames": 12,
+      "gold": 0,
+      "gold_slices": 17,
+      "silver": 12,
+      "tra": 12,
+      "tracks": 33,
+      "divisions": 0,
+      "shape": [
+        30,
+        512,
+        512
+      ],
+      "ndim": 3,
+      "spacing": [
+        6.0,
+        1.242,
+        1.242
+      ]
+    },
+    "02": {
+      "frames": 12,
+      "gold": 0,
+      "gold_slices": 13,
+      "silver": 12,
+      "tra": 12,
+      "tracks": 61,
+      "divisions": 2,
+      "shape": [
+        30,
+        512,
+        512
+      ],
+      "ndim": 3,
+      "spacing": [
+        6.0,
+        1.242,
+        1.242
+      ]
+    }
+  }
+}

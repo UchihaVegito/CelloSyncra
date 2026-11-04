@@ -23,7 +23,7 @@
 #SBATCH --output=logs/%x_%j.out
 #SBATCH --error=logs/%x_%j.err
 ##SBATCH --mail-type=END,FAIL
-##SBATCH --mail-user=belhraka@mail.gvsu.edu
+##SBATCH --mail-user=your_email@example.edu
 
 set -euo pipefail
 

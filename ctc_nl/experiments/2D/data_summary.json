@@ -1,6 +1,5 @@
 {
   "DIC-C2DH-HeLa": {
-    "path": "/mnt/projects/sutravek_project/Ali_belhrak/SI_Project/CTC_Data/CTC_Data/2D/DIC-C2DH-HeLa/DIC-C2DH-HeLa",
     "01": {
       "frames": 84,
       "gold": 9,
@@ -39,7 +38,6 @@
     }
   },
   "Fluo-N2DH-SIM+": {
-    "path": "/mnt/projects/sutravek_project/Ali_belhrak/SI_Project/CTC_Data/CTC_Data/2D/Fluo-N2DH-SIM+/Fluo-N2DH-SIM+",
     "01": {
       "frames": 65,
       "gold": 65,
@@ -78,7 +76,6 @@
     }
   },
   "Fluo-N2DL-HeLa": {
-    "path": "/mnt/projects/sutravek_project/Ali_belhrak/SI_Project/CTC_Data/CTC_Data/2D/Fluo-N2DL-HeLa/Fluo-N2DL-HeLa",
     "01": {
       "frames": 92,
       "gold": 28,
@@ -117,7 +114,6 @@
     }
   },
   "PhC-C2DH-U373": {
-    "path": "/mnt/projects/sutravek_project/Ali_belhrak/SI_Project/CTC_Data/CTC_Data/2D/PhC-C2DH-U373/PhC-C2DH-U373",
     "01": {
       "frames": 115,
       "gold": 15,
@@ -152,135 +148,6 @@
       "spacing": [
         1.0,
         1.0
-      ]
-    }
-  },
-  "Fluo-C3DH-A549": {
-    "path": "/mnt/projects/sutravek_project/Ali_belhrak/SI_Project/CTC_Data/CTC_Data/3D/Fluo-C3DH-A549/Fluo-C3DH-A549",
-    "01": {
-      "frames": 30,
-      "gold": 15,
-      "gold_slices": 0,
-      "silver": 30,
-      "tra": 30,
-      "tracks": 1,
-      "divisions": 0,
-      "shape": [
-        29,
-        300,
-        350
-      ],
-      "ndim": 3,
-      "spacing": [
-        1.0,
-        0.126,
-        0.126
-      ]
-    },
-    "02": {
-      "frames": 30,
-      "gold": 15,
-      "gold_slices": 0,
-      "silver": 30,
-      "tra": 30,
-      "tracks": 1,
-      "divisions": 0,
-      "shape": [
-        28,
-        270,
-        400
-      ],
-      "ndim": 3,
-      "spacing": [
-        1.0,
-        0.126,
-        0.126
-      ]
-    }
-  },
-  "Fluo-C3DH-A549-SIM": {
-    "path": "/mnt/projects/sutravek_project/Ali_belhrak/SI_Project/CTC_Data/CTC_Data/3D/Fluo-C3DH-A549-SIM/Fluo-C3DH-A549-SIM",
-    "01": {
-      "frames": 30,
-      "gold": 30,
-      "gold_slices": 0,
-      "silver": 0,
-      "tra": 30,
-      "tracks": 1,
-      "divisions": 0,
-      "shape": [
-        29,
-        300,
-        350
-      ],
-      "ndim": 3,
-      "spacing": [
-        1.0,
-        0.126,
-        0.126
-      ]
-    },
-    "02": {
-      "frames": 30,
-      "gold": 30,
-      "gold_slices": 0,
-      "silver": 0,
-      "tra": 30,
-      "tracks": 1,
-      "divisions": 0,
-      "shape": [
-        37,
-        300,
-        400
-      ],
-      "ndim": 3,
-      "spacing": [
-        1.0,
-        0.126,
-        0.126
-      ]
-    }
-  },
-  "Fluo-C3DL-MDA231": {
-    "path": "/mnt/projects/sutravek_project/Ali_belhrak/SI_Project/CTC_Data/CTC_Data/3D/Fluo-C3DL-MDA231/Fluo-C3DL-MDA231",
-    "01": {
-      "frames": 12,
-      "gold": 0,
-      "gold_slices": 17,
-      "silver": 12,
-      "tra": 12,
-      "tracks": 33,
-      "divisions": 0,
-      "shape": [
-        30,
-        512,
-        512
-      ],
-      "ndim": 3,
-      "spacing": [
-        6.0,
-        1.242,
-        1.242
-      ]
-    },
-    "02": {
-      "frames": 12,
-      "gold": 0,
-      "gold_slices": 13,
-      "silver": 12,
-      "tra": 12,
-      "tracks": 61,
-      "divisions": 2,
-      "shape": [
-        30,
-        512,
-        512
-      ],
-      "ndim": 3,
-      "spacing": [
-        6.0,
-        1.242,
-        1.242
       ]
     }
   }
