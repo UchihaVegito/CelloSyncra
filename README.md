@@ -7,7 +7,6 @@ Every year, millions of cancer cases go undetected until it is too late. Current
 CelloSyncra lets anyone ask questions about microscopy videos of living cells in plain English, in 2D and 3D, and get answers that are computed from the cells themselves.
 
 <p>
-  <a href="https://alibelhrak.github.io/CelloSyncra/"><b>▶ Try the demo</b></a> ·
   <a href="ctc_nl/experiments/2D+3D/Codes"><b>Code</b></a> ·
   <a href="ctc_nl/experiments/2D+3D/report.md"><b>Results</b></a> ·
   <a href="ctc_nl/docs/architecture_detailed.pdf"><b>Architecture</b></a>
