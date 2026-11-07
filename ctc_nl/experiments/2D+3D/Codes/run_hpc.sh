@@ -15,6 +15,11 @@
 #   sbatch run_hpc.sh zeroshot3d        # (optional) 2D generalist applied to the 3D data (no training)
 #   sbatch run_hpc.sh joint3d           # step 2: ONE generalist trained on 2D + 3D, evaluated on all
 #
+#   Web app (upload sequences, ask questions in a browser):
+#   bash   run_hpc.sh setup             # once, login node: adds fastapi/uvicorn (web server)
+#   sbatch --time=8:00:00 run_hpc.sh web    # then follow the SSH-tunnel line printed in logs/ctc_nl_<job>.out
+#   bash   run_hpc.sh demo              # static demo (recorded answers) for GitHub Pages -> ~/CelloSyncra/docs
+#
 # Protocol: seq 01 = train / model selection, seq 02 = test; *_test folders ignored.
 # =============================================================================
 #SBATCH --job-name=ctc_nl
@@ -96,7 +101,7 @@ setup() {   # LOGIN node: needs internet. Adds ONLY the missing packages to the 
   cat "$CTC_OUT/.venv_pins.txt"
   # extra packages for this pipeline; -c pins keep the existing Cellpose-SAM stack intact
   "$PIP" install -q -c "$CTC_OUT/.venv_pins.txt" timm scikit-learn tabulate openai \
-                 py-ctcmetrics huggingface_hub pillow
+                 py-ctcmetrics huggingface_hub pillow fastapi uvicorn python-multipart
   # pre-download ViT weights so compute nodes need no internet (cpsam weights already exist).
   # HF_HUB_OFFLINE may be set in your shell; lift it only for this download.
   env -u HF_HUB_OFFLINE -u TRANSFORMERS_OFFLINE -u HF_DATASETS_OFFLINE "$VENV/bin/python" - <<'PYEOF' \
@@ -132,6 +137,7 @@ backup_results() {   # snapshot of everything small (masks, bench, results, clas
 }
 # ---- Joint generalist: ONE Cellpose-SAM for 2D and 3D (2D frames + XY/XZ/YZ slices of 3D volumes) ----
 train_joint() {
+  require_2d3d
   local M="$CTC_OUT/models/cpsam/models/cpsam_ft_joint"
   if [ ! -f "$M" ] && [ -f "$BACKUP/cpsam_ft_joint" ]; then
     mkdir -p "$(dirname "$M")"; cp "$BACKUP/cpsam_ft_joint" "$M"; log "restored joint generalist from $BACKUP"
@@ -277,7 +283,16 @@ joint3d() {      # STEP 2: one generalist for 2D + 3D, then everything on it
   report
 }
 
+require_2d3d() {   # the 2D+3D experiment must have its own output folder and must see the 3D data
+  if [ "$CTC_OUT" = "$PROJECT/CTC_Data/Thesis" ]; then
+    echo "ERROR: CTC_OUT is the 2D experiment folder ($CTC_OUT). Give the 2D+3D folder explicitly:" >&2
+    echo "       CTC_OUT=\"$PROJECT/CTC_Data/Thesis/2D+3D\" sbatch run_hpc.sh $STAGE" >&2; exit 1; fi
+  if [[ "$CTC_DATA" != *3D* ]]; then
+    echo "ERROR: CTC_DATA has no 3D root ($CTC_DATA). Use CTC_DATA=<2D root>:<3D root>" >&2; exit 1; fi
+}
+
 full2d3d() {     # THE 2D+3D SYSTEM, end to end: one joint generalist trained on 2D+3D, then every evaluation on it
+  require_2d3d
   BACKENDS=(oracle cpsam_joint)
   prepare
   segment_oracle
@@ -302,6 +317,46 @@ resume() {  # after segmentation exists: evaluation, classifier, Qwen benchmark,
 
 refresh() { eval_seg; report; }    # re-score + re-draw only
 
+# ---------------------------------------------------------------- web app
+# Browser front end: upload a 2D/3D time-lapse, it is segmented + tracked with the joint 2D+3D model,
+# then Qwen answers questions about it (same tools as the benchmark). Runs until the job's time limit.
+#   sbatch --time=8:00:00 run_hpc.sh web
+WEB_OUT=${WEB_OUT:-$PROJECT/CTC_Data/Thesis/2D+3D}         # experiment with the joint model + test-video masks
+WEB_WORK=${WEB_WORK:-$PROJECT/CTC_Data/Web_uploads}         # uploads and their masks (outside Thesis/)
+WEB_PORT=${WEB_PORT:-$((8900 + ${SLURM_JOB_ID:-0} % 90))}
+# second cell finder offered on the upload page (default when present): the model fine-tuned with QPI
+QPI_MODEL_DEFAULT=$PROJECT/Quantitative-Phase_data/CelloSyncra/out/models/cpsam/models/cpsam_ft_joint_qpi
+WEB_SEG_MODEL_QPI=${WEB_SEG_MODEL_QPI-$( [ -f "$QPI_MODEL_DEFAULT" ] && echo "$QPI_MODEL_DEFAULT" )}
+web() {
+  "$VENV/bin/python" -c "import fastapi, uvicorn, multipart" 2>/dev/null \
+    || { echo "ERROR: web packages missing - run on the login node: bash run_hpc.sh setup" >&2; exit 1; }
+  export QWEN_GPU_MEM=${QWEN_GPU_MEM:-0.75}               # leave GPU memory for Cellpose-SAM on uploads
+  start_qwen
+  mkdir -p "$WEB_WORK"
+  local NODE; NODE=$(hostname -s)
+  log "web app: node $NODE, port $WEB_PORT"
+  echo "################################################################################"
+  echo " THIS JOB: node $NODE, port $WEB_PORT  (both change with every job)"
+  echo " 1) In PowerShell on your laptop, paste this (password twice, keep it open):"
+  echo ""
+  echo "     ssh -N -J $USER@port.clipper.gvsu.edu -L $WEB_PORT:localhost:$WEB_PORT $USER@$NODE"
+  echo ""
+  echo " 2) Then open the http://localhost:$WEB_PORT/?token=... link printed below."
+  echo "################################################################################"
+  OPENAI_API_KEY=EMPTY "$VENV/bin/python" "$CODE_DIR/cellosyncra_web.py" --out "$WEB_OUT" --data "$CTC_DATA" \
+      --work "$WEB_WORK" --backup "$BACKUP" --llm-url "$QWEN_URL" --llm-model "$OPEN_LLM" --port "$WEB_PORT" \
+      ${WEB_SEG_MODEL_QPI:+--model-qpi "$WEB_SEG_MODEL_QPI"}
+}
+
+# Static demo for GitHub Pages: replays the recorded Qwen answers on the test videos (no GPU needed).
+#   bash run_hpc.sh demo          then commit ~/CelloSyncra/docs and enable Pages (branch main, folder /docs)
+DEMO_DEST=${DEMO_DEST:-$HOME/CelloSyncra/docs}
+demo() {
+  "$VENV/bin/python" "$CODE_DIR/export_demo.py" --out "$WEB_OUT" --data "$CTC_DATA" --dest "$DEMO_DEST" \
+      --ai-backend cpsam_joint --planner-glob "openai-*72B*"
+  log "demo written to $DEMO_DEST - now: cd ${DEMO_DEST%/docs} && git add docs && git commit -m 'Add demo' && git push"
+}
+
 report()  { $PY report; $PY figures --n-examples 3 --dpi 200; backup_results; }   # tables + PNGs + snapshot
 figures() { $PY figures --n-examples 3 --dpi 200; }
 
@@ -313,7 +368,7 @@ log "stage=$STAGE  data=$CTC_DATA  out=$CTC_OUT  host=$(hostname)"
 nvidia-smi --query-gpu=name,memory.total --format=csv,noheader 2>/dev/null || log "no GPU visible"
 # GPU stages must never fall back to CPU silently (days instead of hours)
 case "$STAGE" in
-  gpu|resume|refresh|qwen_bench|train_generalist|segment_generalist|train_joint|segment_joint|zeroshot3d|joint3d|full2d3d|train_cls|selftest)
+  gpu|resume|refresh|qwen_bench|train_generalist|segment_generalist|train_joint|segment_joint|zeroshot3d|joint3d|full2d3d|train_cls|selftest|web)
     if ! "$VENV/bin/python" -c "import torch,sys; sys.exit(0 if torch.cuda.is_available() else 1)" 2>/dev/null; then
       echo "ERROR: no working CUDA GPU on $(hostname) - this node is faulty." >&2
       echo "       Resubmit excluding it:  sbatch --exclude=$(hostname -s),g050,g051 run_hpc.sh $STAGE" >&2

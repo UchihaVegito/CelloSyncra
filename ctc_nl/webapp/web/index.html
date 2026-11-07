@@ -1,0 +1,758 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CelloSyncra</title>
+<style>
+:root{
+  --bg:#f5f5fa; --panel:#ffffff; --line:#e6e4ef; --text:#1b1a2e; --muted:#6c6a80; --soft:#f0eefa;
+  --brand:#5b3fd0; --brand-2:#7a60e6; --brand-soft:#ece8fc; --ok:#1f9d55; --ok-soft:#e5f6ec;
+  --warn:#d9822b; --warn-soft:#fdf0e2; --bad:#d64545; --bad-soft:#fbe9e9; --cyan:#00b4d8;
+  --radius:14px; --shadow:0 1px 2px rgba(20,16,60,.05),0 4px 16px rgba(20,16,60,.05);
+  font-family: Inter, "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font-size:14px}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--brand)}
+.app{display:flex;height:100vh;overflow:hidden}
+/* sidebar */
+.side{width:210px;flex:none;background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:18px 12px}
+.logo{display:flex;align-items:center;gap:10px;padding:2px 8px 18px}
+.logo .mark{width:34px;height:34px;border-radius:10px;background:var(--brand);display:grid;place-items:center;color:#fff;font-weight:700}
+.logo .nm{font-weight:700;font-size:16px;letter-spacing:.2px}
+.logo .sub{font-size:11px;color:var(--muted)}
+.nav button{display:flex;align-items:center;gap:10px;width:100%;border:0;background:none;padding:9px 10px;border-radius:10px;cursor:pointer;color:var(--muted);text-align:left;margin-bottom:2px}
+.nav button:hover{background:var(--soft);color:var(--text)}
+.nav button.on{background:var(--brand-soft);color:var(--brand);font-weight:600}
+.nav svg{width:18px;height:18px;flex:none}
+.side .foot{margin-top:auto;font-size:12px;color:var(--muted);padding:10px;border-top:1px solid var(--line)}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#aaa;margin-right:6px;vertical-align:1px}
+.dot.ok{background:var(--ok)} .dot.bad{background:var(--bad)} .dot.wait{background:var(--warn)}
+/* main */
+.main{flex:1;overflow:auto;padding:22px 26px}
+h1{font-size:20px;margin:0 0 4px} h2{font-size:15px;margin:0 0 12px}
+.lead{color:var(--muted);margin:0 0 18px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px}
+.row{display:flex;gap:16px} .col{display:flex;flex-direction:column;gap:16px}
+.btn{border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:7px 12px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.btn:hover{border-color:#cfcbe3;background:#faf9fe}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+.btn.primary:hover{background:var(--brand-2)}
+.btn.primary:disabled{opacity:.5;cursor:not-allowed}
+.btn.on{background:var(--brand-soft);border-color:#cfc5f7;color:var(--brand)}
+.btn.sm{padding:4px 9px;font-size:12.5px;border-radius:8px}
+.btn.ghost{border-color:transparent;background:none}
+.btn svg{width:16px;height:16px}
+.pill{display:inline-block;font-size:11.5px;padding:2px 8px;border-radius:999px;background:var(--soft);color:var(--muted);font-weight:600}
+.pill.d2{background:#e3f4fb;color:#0a7ea4} .pill.d3{background:#fdeee4;color:#c4561d}
+.pill.ok{background:var(--ok-soft);color:var(--ok)} .pill.warn{background:var(--warn-soft);color:var(--warn)} .pill.bad{background:var(--bad-soft);color:var(--bad)}
+.muted{color:var(--muted)} .small{font-size:12.5px}
+.hidden{display:none!important}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+.bar{height:6px;background:var(--soft);border-radius:6px;overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--brand);width:0;transition:width .3s}
+input[type=text],input[type=number],select,textarea{border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:#fff;outline:none}
+input:focus,select:focus,textarea:focus{border-color:#b9acf2;box-shadow:0 0 0 3px #ece8fc}
+label.f{display:block;font-size:12.5px;color:var(--muted);margin:0 0 4px;font-weight:600}
+/* upload */
+.drop{border:2px dashed #cfc8ee;border-radius:12px;padding:22px;text-align:center;background:#fbfaff;cursor:pointer;transition:.15s}
+.drop.over{border-color:var(--brand);background:var(--brand-soft)}
+.drop b{color:var(--brand)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.seg button{border:0;background:#fff;padding:7px 12px;cursor:pointer}
+.seg button.on{background:var(--brand);color:#fff}
+.steps3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.steps3 div{background:var(--soft);border-radius:10px;padding:10px;font-size:12.5px}
+.steps3 b{display:block;color:var(--brand);margin-bottom:2px}
+.sq{overflow:hidden;padding:0;display:flex;flex-direction:column}
+.sq .th{height:150px;background:#111 center/cover no-repeat;display:grid;place-items:center;color:#777;font-size:12px}
+.sq .bd{padding:12px;display:flex;flex-direction:column;gap:8px;flex:1}
+.sq .nm{font-weight:600;word-break:break-word}
+.sq .acts{display:flex;gap:6px;margin-top:auto;flex-wrap:wrap}
+/* explore */
+.ex{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(330px,1fr);gap:16px;align-items:start}
+.vhead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.vhead .t{font-weight:700;font-size:16px}
+.tools{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:8px 0}
+.tools .sep{width:1px;height:22px;background:var(--line);margin:0 4px}
+.vp{position:relative;height:min(62vh,640px);background:#0d0c16;border-radius:12px;overflow:hidden;cursor:grab;user-select:none}
+.vp.box{cursor:crosshair} .vp.drag{cursor:grabbing}
+.stage{position:absolute;left:0;top:0;transform-origin:0 0}
+.stage img{display:block;image-rendering:auto}
+.stage svg{position:absolute;inset:0;overflow:visible;pointer-events:none}
+.vp .hint{position:absolute;left:12px;bottom:10px;background:rgba(15,13,30,.75);color:#ddd;font-size:12px;padding:5px 9px;border-radius:8px;pointer-events:none}
+.vp .badge{position:absolute;right:12px;top:10px;background:rgba(15,13,30,.75);color:#fff;font-size:12px;padding:5px 9px;border-radius:8px;pointer-events:none}
+.vp .msg{position:absolute;inset:0;display:grid;place-items:center;color:#bbb;font-size:13px;text-align:center;padding:20px}
+.frames{display:flex;align-items:center;gap:8px;margin-top:10px}
+.frames input[type=range]{flex:1;accent-color:var(--brand)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:8px}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.cellcard .kv{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin:10px 0}
+.kv div{background:var(--soft);border-radius:10px;padding:8px 10px}
+.kv span{display:block;font-size:11.5px;color:var(--muted)} .kv b{font-size:14px}
+.lin{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px}
+.lin .node{border:1px solid #cfc5f7;background:var(--brand-soft);color:var(--brand);border-radius:8px;padding:3px 8px;font-weight:600;cursor:pointer}
+/* chat */
+.chat{display:flex;flex-direction:column;height:calc(min(62vh,640px) + 150px);min-height:520px;padding:0}
+.chat .hd{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px}
+.chat .hd .t{font-weight:700}
+.msgs{flex:1;overflow:auto;padding:14px 16px;display:flex;flex-direction:column;gap:12px}
+.um{align-self:flex-end;max-width:88%;background:var(--brand-soft);color:#2a1d75;border-radius:14px 14px 4px 14px;padding:9px 12px;white-space:pre-wrap}
+.am{align-self:flex-start;max-width:96%;background:#fff;border:1px solid var(--line);border-radius:14px 14px 14px 4px;padding:11px 13px}
+.am .big{font-weight:700;font-size:15px;margin-bottom:4px}
+.am .note{color:var(--muted);font-style:italic;margin:4px 0}
+.am .chips{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0}
+.chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:3px 9px;font-size:12px;cursor:pointer}
+.chip:hover{border-color:var(--brand);color:var(--brand)}
+.chip.g{background:var(--ok-soft);border-color:#bfe6cf;color:#13703b}
+.chip.o{background:var(--warn-soft);border-color:#f3cfa6;color:#9a5410}
+.am .meta{font-size:11.5px;color:var(--muted);margin-top:6px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.am details{margin-top:6px}
+.am summary{cursor:pointer;font-size:12.5px;color:var(--brand);font-weight:600}
+.trace{margin:6px 0 0;padding:0;list-style:none;font-size:12px}
+.trace li{padding:6px 8px;border-left:3px solid #d9d2fb;background:#faf9ff;margin-bottom:4px;border-radius:0 6px 6px 0}
+.trace code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11.5px;word-break:break-word}
+.trace .o{color:var(--muted);display:block;margin-top:2px}
+.am.err{border-color:#f1c2c2;background:var(--bad-soft)}
+.typing{display:inline-flex;gap:4px} .typing i{width:6px;height:6px;border-radius:50%;background:#b8acef;animation:b 1s infinite}
+.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+@keyframes b{0%,80%,100%{opacity:.3;transform:translateY(0)}40%{opacity:1;transform:translateY(-3px)}}
+.ex-q{display:flex;flex-direction:column;gap:6px;margin-top:6px}
+.ex-q button{text-align:left;border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 10px;cursor:pointer;font-size:13px}
+.ex-q button:hover{border-color:var(--brand);background:#faf9ff}
+.inp{border-top:1px solid var(--line);padding:12px}
+.inp .roi{margin-bottom:8px}
+.inp .box{display:flex;gap:8px;align-items:flex-end;border:1px solid var(--line);border-radius:12px;padding:6px 6px 6px 12px;background:#fff}
+.inp .box:focus-within{border-color:#b9acf2;box-shadow:0 0 0 3px #ece8fc}
+.inp textarea{flex:1;border:0;box-shadow:none!important;resize:none;padding:6px 0;max-height:140px;min-height:24px}
+table{width:100%;border-collapse:collapse}
+th,td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;color:var(--muted);font-weight:600}
+tr.click{cursor:pointer} tr.click:hover td{background:#faf9fe}
+.toast{position:fixed;right:20px;bottom:20px;background:#1b1a2e;color:#fff;padding:10px 14px;border-radius:10px;box-shadow:var(--shadow);max-width:420px;z-index:9;font-size:13px}
+.toast.bad{background:var(--bad)}
+.empty{color:var(--muted);text-align:center;padding:24px}
+@media (max-width:1100px){.ex{grid-template-columns:1fr}.chat{height:560px}}
+@media (max-width:760px){.app{flex-direction:column;height:auto;overflow:visible}.side{width:auto;flex-direction:row;align-items:center;padding:8px;overflow-x:auto}
+ .side .foot,.logo .sub{display:none}.nav{display:flex}.logo{padding:0 8px}.main{padding:16px;overflow:visible}.row{flex-direction:column}.vp{height:60vh}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="logo"><div class="mark">C</div><div><div class="nm">CelloSyncra</div><div class="sub">ask your cells</div></div></div>
+    <nav class="nav">
+      <button data-v="seqs" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h10"/></svg>Sequences</button>
+      <button data-v="explore"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>Explore &amp; ask</button>
+      <button data-v="results"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Results</button>
+      <button data-v="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Settings</button>
+    </nav>
+    <div class="foot"><div><span class="dot" id="llmDot"></span><span id="llmTxt">checking assistant…</span></div><div style="margin-top:6px"><span class="dot" id="gpuDot"></span><span id="gpuTxt">…</span></div></div>
+  </aside>
+
+  <main class="main">
+    <!-- ============ SEQUENCES ============ -->
+    <section id="v-seqs">
+      <h1>Sequences</h1>
+      <p class="lead">Upload a 2D or 3D time-lapse. CelloSyncra finds and tracks every cell, then you can ask questions about it in plain English.</p>
+      <div class="row" style="align-items:stretch">
+        <div class="card" style="flex:1.3">
+          <h2>Upload a sequence</h2>
+          <div class="drop" id="drop">
+            <input type="file" id="fileIn" multiple accept=".tif,.tiff,.zip" class="hidden">
+            <div style="font-size:15px"><b>Choose files</b> or drop them here</div>
+            <div class="small muted" style="margin-top:6px">.tif / .tiff: one image per time point, or one multi-page file &nbsp;·&nbsp; or a .zip of them</div>
+            <div class="small" id="fileSum" style="margin-top:8px"></div>
+          </div>
+          <div class="row" style="margin-top:14px;flex-wrap:wrap;gap:14px">
+            <div style="flex:1;min-width:180px"><label class="f">Name</label><input type="text" id="upName" placeholder="e.g. HeLa experiment 3" style="width:100%"></div>
+            <div><label class="f">Type</label><div class="seg" id="upType"><button data-n="2" class="on">2D time-lapse</button><button data-n="3">3D time-lapse</button></div></div>
+            <div id="upModelBox" class="hidden"><label class="f">Cell finder</label><select id="upModel"></select></div>
+          </div>
+          <div id="vox" class="hidden" style="margin-top:12px">
+            <label class="f">Voxel size in µm (z, y, x) — used for volumes and for the depth resampling</label>
+            <div style="display:flex;gap:8px;align-items:center">
+              z <input type="number" id="vz" value="1" step="any" min="0" style="width:90px">
+              y <input type="number" id="vy" value="1" step="any" min="0" style="width:90px">
+              x <input type="number" id="vx" value="1" step="any" min="0" style="width:90px">
+            </div>
+          </div>
+          <div style="display:flex;gap:12px;align-items:center;margin-top:16px">
+            <button class="btn primary" id="upBtn" disabled>Upload and analyse</button>
+            <div style="flex:1" class="hidden" id="upProg"><div class="bar"><i id="upBar"></i></div><div class="small muted" id="upTxt" style="margin-top:4px"></div></div>
+          </div>
+        </div>
+        <div class="card" style="flex:1">
+          <h2>What happens</h2>
+          <div class="steps3" style="margin-top:0">
+            <div><b>1 · Find</b>Cellpose-SAM (one model for 2D and 3D) draws every cell.</div>
+            <div><b>2 · Track</b>Each cell is followed over time, including when it splits.</div>
+            <div><b>3 · Ask</b>Qwen2.5-72B answers your questions from the measurements.</div>
+          </div>
+          <p class="small muted" style="margin:14px 0 0">The assistant never guesses numbers: it calls measurement tools on the cell table, and every answer is drawn on the image so you can check it. Everything runs on the university GPU; images never leave the cluster.</p>
+        </div>
+      </div>
+
+      <h2 style="margin-top:26px">Your sequences</h2>
+      <div class="grid" id="upList"></div>
+      <div class="empty hidden" id="upEmpty">No uploads yet.</div>
+
+      <h2 style="margin-top:26px">Test videos (Cell Tracking Challenge)</h2>
+      <p class="lead small" style="margin-top:-6px">The test sequences of the thesis experiment, already segmented. Open them with our AI's outlines or with the ground truth.</p>
+      <div class="grid" id="libList"></div>
+      <div class="empty hidden" id="libEmpty">No segmented test videos found in the results folder.</div>
+    </section>
+
+    <!-- ============ EXPLORE ============ -->
+    <section id="v-explore" class="hidden">
+      <div id="noSeq" class="card empty">Open a sequence from <a href="#" data-go="seqs">Sequences</a> first.</div>
+      <div class="ex hidden" id="exWrap">
+        <div class="col">
+          <div class="card">
+            <div class="vhead">
+              <span class="t" id="sqName"></span><span class="pill" id="sqDim"></span><span class="pill" id="sqBe"></span>
+              <span style="flex:1"></span>
+              <span id="rerun"></span>
+              <select id="dl" title="Download" style="width:auto"><option value="">Download…</option><option value="cells.csv">Cell table (.csv)</option><option value="masks.zip">Masks, CTC format (.zip)</option><option value="history.json">Answers (.json)</option></select>
+            </div>
+            <div class="tools">
+              <button class="btn sm on" id="tPan" title="Move and zoom (drag / scroll). Click a cell to see its details."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 11V6a2 2 0 0 0-4 0v5M14 10V4a2 2 0 0 0-4 0v6M10 10.5V6a2 2 0 0 0-4 0v8a8 8 0 0 0 16 0v-3a2 2 0 0 0-4 0"/></svg>Move</button>
+              <button class="btn sm" id="tBox" title="Draw a box: its coordinates go into your question"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="1" stroke-dasharray="3 3"/></svg>Box</button>
+              <span class="sep"></span>
+              <button class="btn sm" id="zOut">−</button><span class="small" id="zTxt" style="min-width:44px;text-align:center">100%</span><button class="btn sm" id="zIn">+</button>
+              <button class="btn sm" id="zReset">Reset</button>
+              <span class="sep"></span>
+              <button class="btn sm on" id="tOut" title="Show the outline of every cell">Outlines</button>
+              <span id="v3" class="hidden" style="display:inline-flex;gap:6px;align-items:center">
+                <span class="sep"></span>
+                <select id="vMode"><option value="max">Top view (all slices)</option><option value="z">One slice</option></select>
+                <input type="range" id="zSl" min="0" max="0" value="0" class="hidden" style="width:110px;accent-color:var(--brand)"><span class="small hidden" id="zLab"></span>
+              </span>
+            </div>
+            <div class="vp" id="vp">
+              <div class="stage" id="stage"><img id="img" alt="microscope frame" draggable="false"><svg id="ov"><g id="gRoi"></g><g id="gLab"></g></svg></div>
+              <div class="msg hidden" id="vpMsg"></div>
+              <div class="badge" id="vpBadge"></div>
+              <div class="hint" id="vpHint">Scroll to zoom · drag to move · click a cell</div>
+            </div>
+            <div class="frames">
+              <button class="btn sm" id="fPrev" title="Previous frame (←)">◀</button>
+              <button class="btn sm" id="fPlay" title="Play">▶ Play</button>
+              <button class="btn sm" id="fNext" title="Next frame (→)">▶</button>
+              <input type="range" id="fSl" min="0" max="0" value="0">
+              <span class="small" id="fTxt" style="min-width:110px;text-align:right"></span>
+            </div>
+            <div class="legend"><span><i style="background:var(--cyan)"></i>outline of each cell</span><span><i style="background:#3cdc6e"></i>answer</span><span><i style="background:#ff9628"></i>cell division</span><span><i style="background:#ffd700"></i>selected cell</span></div>
+          </div>
+          <div class="card cellcard hidden" id="cellCard"></div>
+        </div>
+        <div class="card chat">
+          <div class="hd"><span class="t">Ask CelloSyncra</span><span style="flex:1"></span><span class="small muted"><span class="dot" id="llmDot2"></span><span id="llmTxt2"></span></span></div>
+          <div class="msgs" id="msgs"></div>
+          <div class="inp">
+            <div class="roi hidden" id="roiChip"></div>
+            <div class="box"><textarea id="q" rows="1" placeholder="Ask about the cells, e.g. which 3 cells are the largest in frame 10?"></textarea>
+              <button class="btn primary" id="send"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/></svg>Send</button></div>
+            <div class="small muted" style="margin-top:6px">Enter to send · Shift+Enter for a new line</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ RESULTS ============ -->
+    <section id="v-results" class="hidden">
+      <h1>Results</h1>
+      <p class="lead">Every question asked, newest first. Click a row to open it on its sequence.</p>
+      <div class="card" style="padding:4px 8px"><table><thead><tr><th style="width:120px">When</th><th>Sequence</th><th>Question</th><th>Answer</th><th style="width:90px">Time</th></tr></thead><tbody id="resBody"></tbody></table>
+      <div class="empty hidden" id="resEmpty">No questions yet.</div></div>
+    </section>
+
+    <!-- ============ SETTINGS ============ -->
+    <section id="v-settings" class="hidden">
+      <h1>Settings</h1>
+      <p class="lead">How this server is set up.</p>
+      <div class="row">
+        <div class="card" style="flex:1"><h2>System</h2><table id="sysTbl"></table></div>
+        <div class="card" style="flex:1"><h2>Assistant</h2>
+          <label class="f">Who answers the questions</label>
+          <div class="seg" id="plSeg"><button data-p="qwen" class="on">Qwen2.5-72B (LLM)</button><button data-p="offline">Keyword planner (test)</button></div>
+          <p class="small muted">The keyword planner is a simple rule-based baseline without an LLM. It only understands questions phrased like the benchmark templates; use it to test the app when the LLM server is not running.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+<div class="toast hidden" id="toast"></div>
+
+<script>
+"use strict";
+// ---------------------------------------------------------------- token + api
+const qs = new URLSearchParams(location.search);
+if (qs.get("token")) { try { sessionStorage.setItem("cs_token", qs.get("token")); } catch (e) {} }
+let TOKEN = qs.get("token") || (() => { try { return sessionStorage.getItem("cs_token") || ""; } catch (e) { return ""; } })();
+if (qs.get("token")) history.replaceState(null, "", location.pathname + location.hash);
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+async function api(path, opt = {}) {
+  const r = await fetch(path, {...opt, headers: {...(opt.headers || {}), "X-Token": TOKEN}});
+  if (!r.ok) { let m = r.statusText; try { m = (await r.json()).detail || m; } catch (e) {} throw new Error(m); }
+  return r;
+}
+const J = async (p, o) => (await api(p, o)).json();
+const withTok = u => u + (u.includes("?") ? "&" : "?") + "token=" + encodeURIComponent(TOKEN);
+function toast(msg, bad) { const t = $("#toast"); t.textContent = msg; t.className = "toast" + (bad ? " bad" : ""); clearTimeout(t._h); t._h = setTimeout(() => t.classList.add("hidden"), bad ? 6000 : 3000); }
+const store = { get(k, d) { try { const v = localStorage.getItem("cs_" + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+                set(k, v) { try { localStorage.setItem("cs_" + k, JSON.stringify(v)); } catch (e) {} } };
+
+// ---------------------------------------------------------------- navigation
+const S = { view: "seqs", seqs: {uploads: [], library: []}, cur: null, t: 0, frames: [0, 0], zv: "max", outlines: true,
+            hl: null, divMap: {}, sel: null, follow: null, mode: "pan", roi: null, zoom: 1, fit: 1, tx: 0, ty: 0,
+            W: 0, H: 0, playing: false, planner: store.get("planner", "qwen"), status: null, busy: false };
+function show(v) {
+  S.view = v;
+  document.querySelectorAll(".nav button").forEach(b => b.classList.toggle("on", b.dataset.v === v));
+  ["seqs", "explore", "results", "settings"].forEach(x => $("#v-" + x).classList.toggle("hidden", x !== v));
+  if (v === "seqs") loadSeqs();
+  if (v === "results") loadResults();
+  if (v === "settings") renderSettings();
+  if (v === "explore" && S.cur) requestAnimationFrame(() => { if (!S.W) return; fitView(false); });
+}
+document.querySelectorAll(".nav button").forEach(b => b.onclick = () => show(b.dataset.v));
+document.querySelectorAll("[data-go]").forEach(a => a.onclick = e => { e.preventDefault(); show(a.dataset.go); });
+
+// ---------------------------------------------------------------- status
+async function loadStatus() {
+  try {
+    const s = S.status = await J("api/status");
+    const ok = s.llm.ok, name = (s.llm.model || "").split("/").pop();
+    for (const [d, t] of [["#llmDot", "#llmTxt"], ["#llmDot2", "#llmTxt2"]]) {
+      $(d).className = "dot " + (ok ? "ok" : "bad");
+      $(t).textContent = ok ? name + " ready" : "assistant offline";
+    }
+    renderModelChoices();
+    $("#gpuDot").className = "dot " + (s.gpu ? "ok" : "wait");
+    $("#gpuTxt").textContent = s.gpu ? s.gpu.replace("NVIDIA ", "") : "no GPU (slow)";
+    if (S.view === "settings") renderSettings();
+  } catch (e) {
+    $("#llmDot").className = "dot bad"; $("#llmTxt").textContent = e.message.includes("token") ? "access token missing" : "server unreachable";
+    if (e.message.includes("token")) toast("Access token missing or wrong: open the link printed in the job log.", true);
+  }
+}
+function renderModelChoices() {
+  const ms = (S.status && S.status.models) || [];
+  const sel = $("#upModel"), keep = sel.value;
+  sel.innerHTML = ms.map(m => `<option value="${esc(m.key)}">${esc(m.label)}</option>`).join("");
+  sel.value = ms.some(m => m.key === keep) ? keep : (S.status.default_model || "");
+  $("#upModelBox").classList.toggle("hidden", ms.length < 2);
+  if (S.cur) renderRerun();
+}
+function renderSettings() {
+  const s = S.status || {}, l = s.llm || {};
+  const rows = [["Assistant model", l.model], ["Assistant server", l.url || "—"], ["Assistant status", l.ok ? "ready" : ("offline " + (l.error ? "(" + l.error + ")" : ""))],
+                ["GPU", s.gpu || "none"],
+                ...((s.models || []).map(m => ["Cell finder: " + m.label + (m.key === s.default_model ? " (default)" : ""), m.path])), ["Uploads stored in", s.work], ["Experiment folder", s.out],
+                ["Segmentation queue", (s.queue || []).length ? s.queue.length + " waiting" : "empty"]];
+  $("#sysTbl").innerHTML = rows.map(([k, v]) => `<tr><th style="width:170px">${esc(k)}</th><td class="small" style="word-break:break-all">${esc(v)}</td></tr>`).join("");
+  document.querySelectorAll("#plSeg button").forEach(b => b.classList.toggle("on", b.dataset.p === S.planner));
+}
+document.querySelectorAll("#plSeg button").forEach(b => b.onclick = () => { S.planner = b.dataset.p; store.set("planner", S.planner); renderSettings(); });
+
+// ---------------------------------------------------------------- sequences
+let pollH = null;
+const statusPill = m => {
+  if (m.status === "ready") return `<span class="pill ok">ready</span>`;
+  if (m.status === "error") return `<span class="pill bad">error</span>`;
+  const lab = {queued: "waiting for the GPU", converting: "reading images", segmenting: "finding and tracking cells"}[m.status] || m.status;
+  return `<span class="pill warn">${lab}</span>`;
+};
+function seqCard(m, lib) {
+  const p = m.progress || [0, 0], pct = p[1] ? Math.round(100 * p[0] / p[1]) : 0;
+  const th = (m.status === "ready" || m.status === "segmenting") ? `style="background-image:url('${withTok(`api/seqs/${m.id}/frame/${(m.frames || [0])[0]}.png?maxw=420&outlines=${m.status === "ready" ? 1 : 0}`)}')"` : "";
+  const dim = m.ndim ? `<span class="pill d${m.ndim}">${m.ndim}D</span>` : "";
+  const nf = m.n_frames ? `<span class="small muted">${m.n_frames} frames</span>` : "";
+  const cells = m.cells_per_frame && m.cells_per_frame.length ? `<span class="small muted">· ~${Math.round(m.cells_per_frame.reduce((a, b) => a + b, 0) / m.cells_per_frame.length)} cells/frame</span>` : "";
+  return `<div class="card sq"><div class="th" ${th}>${th ? "" : (m.status === "error" ? "could not be read" : "processing…")}</div><div class="bd">
+    <div class="nm">${esc(m.name)}</div>
+    <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">${dim}${lib ? `<span class="pill">${esc(m.backend_label)}</span>` : statusPill(m) + (m.model_label ? ` <span class="pill">${esc(m.model_label)}</span>` : "")} ${nf} ${cells}</div>
+    ${m.status === "segmenting" || m.status === "queued" || m.status === "converting" ? `<div class="bar"><i style="width:${pct}%"></i></div><div class="small muted">${p[1] ? p[0] + " / " + p[1] + " frames" : ""}</div>` : ""}
+    ${m.status === "error" ? `<div class="small" style="color:var(--bad)">${esc(m.error)}</div>` : ""}
+    <div class="acts">${m.status === "ready" ? `<button class="btn sm primary" data-open="${m.id}">Open</button>` : ""}
+      ${lib ? "" : `<button class="btn sm ghost" data-del="${m.id}" title="Remove (moved to the trash folder)">Remove</button>`}</div></div></div>`;
+}
+async function loadSeqs() {
+  try { S.seqs = await J("api/seqs"); } catch (e) { return; }
+  const U = S.seqs.uploads, L = S.seqs.library;
+  $("#upList").innerHTML = U.map(m => seqCard(m, false)).join("");
+  $("#upEmpty").classList.toggle("hidden", U.length > 0);
+  $("#libList").innerHTML = L.map(m => seqCard(m, true)).join("");
+  $("#libEmpty").classList.toggle("hidden", L.length > 0);
+  document.querySelectorAll("[data-open]").forEach(b => b.onclick = () => openSeq(b.dataset.open));
+  document.querySelectorAll("[data-del]").forEach(b => b.onclick = async () => {
+    if (!confirm("Remove this sequence? Its files are moved to the trash folder on the server.")) return;
+    try { await api("api/seqs/" + b.dataset.del, {method: "DELETE"}); if (S.cur && S.cur.id === b.dataset.del) S.cur = null; loadSeqs(); } catch (e) { toast(e.message, true); }
+  });
+  const busy = U.some(m => ["queued", "converting", "segmenting"].includes(m.status));
+  clearTimeout(pollH);
+  if (busy) pollH = setTimeout(() => { if (S.view === "seqs") loadSeqs(); }, 2500);
+}
+
+// upload form
+let FILES = [], UPN = 2;
+const drop = $("#drop"), fin = $("#fileIn");
+drop.onclick = () => fin.click();
+drop.ondragover = e => { e.preventDefault(); drop.classList.add("over"); };
+drop.ondragleave = () => drop.classList.remove("over");
+drop.ondrop = e => { e.preventDefault(); drop.classList.remove("over"); setFiles([...e.dataTransfer.files]); };
+fin.onchange = () => setFiles([...fin.files]);
+function setFiles(fs) {
+  FILES = fs.filter(f => /\.(tiff?|zip)$/i.test(f.name));
+  const mb = FILES.reduce((a, f) => a + f.size, 0) / 1e6;
+  $("#fileSum").innerHTML = FILES.length ? `<b>${FILES.length}</b> file${FILES.length > 1 ? "s" : ""} · ${mb.toFixed(1)} MB` + (fs.length > FILES.length ? ` <span class="muted">(${fs.length - FILES.length} ignored: not .tif/.zip)</span>` : "") : (fs.length ? `<span style="color:var(--bad)">No .tif, .tiff or .zip files selected</span>` : "");
+  if (FILES.length && !$("#upName").value) $("#upName").value = FILES[0].name.replace(/\.(tiff?|zip)$/i, "").replace(/[_-]?t?\d+$/, "") || "sequence";
+  $("#upBtn").disabled = !FILES.length;
+}
+document.querySelectorAll("#upType button").forEach(b => b.onclick = () => {
+  UPN = +b.dataset.n; document.querySelectorAll("#upType button").forEach(x => x.classList.toggle("on", x === b));
+  $("#vox").classList.toggle("hidden", UPN !== 3);
+});
+$("#upBtn").onclick = () => {
+  const fd = new FormData();
+  FILES.forEach(f => fd.append("files", f, f.name));
+  fd.append("name", $("#upName").value); fd.append("ndim", UPN);
+  if ($("#upModel").value) fd.append("model", $("#upModel").value);
+  fd.append("vz", $("#vz").value || 1); fd.append("vy", $("#vy").value || 1); fd.append("vx", $("#vx").value || 1);
+  const x = new XMLHttpRequest();
+  x.open("POST", "api/seqs"); x.setRequestHeader("X-Token", TOKEN);
+  $("#upProg").classList.remove("hidden"); $("#upBtn").disabled = true;
+  x.upload.onprogress = e => { if (e.lengthComputable) { const p = Math.round(100 * e.loaded / e.total); $("#upBar").style.width = p + "%"; $("#upTxt").textContent = `uploading… ${p}%`; } };
+  x.onload = () => {
+    $("#upBtn").disabled = false;
+    if (x.status >= 200 && x.status < 300) {
+      $("#upTxt").textContent = "uploaded: finding and tracking the cells on the GPU…"; FILES = []; $("#fileSum").textContent = ""; fin.value = ""; $("#upName").value = ""; $("#upBtn").disabled = true;
+      setTimeout(() => $("#upProg").classList.add("hidden"), 2500); loadSeqs();
+    } else { let m = x.statusText; try { m = JSON.parse(x.responseText).detail; } catch (e) {} $("#upTxt").textContent = "upload failed: " + m; toast("Upload failed: " + m, true); }
+  };
+  x.onerror = () => { $("#upBtn").disabled = false; $("#upTxt").textContent = "upload failed (network)"; };
+  x.send(fd);
+};
+
+// ---------------------------------------------------------------- explore: open
+async function openSeq(id, thenAnswer) {
+  let m;
+  try { m = await J("api/seqs/" + id); } catch (e) { toast(e.message, true); return; }
+  S.cur = m; S.frames = m.frames || [0, 0]; S.t = S.frames[0]; S.hl = null; S.divMap = {}; S.sel = null; S.follow = null; S.roi = null; S.zv = "max"; S.W = 0;
+  $("#noSeq").classList.add("hidden"); $("#exWrap").classList.remove("hidden");
+  $("#sqName").textContent = m.name;
+  $("#sqDim").textContent = m.ndim + "D"; $("#sqDim").className = "pill d" + m.ndim;
+  $("#sqBe").textContent = m.backend_label || ""; renderRerun();
+  $("#fSl").min = S.frames[0]; $("#fSl").max = S.frames[1]; $("#fSl").value = S.t;
+  $("#v3").classList.toggle("hidden", m.ndim !== 3); $("#vMode").value = "max"; $("#zSl").classList.add("hidden"); $("#zLab").classList.add("hidden");
+  if (m.ndim === 3 && m.shape) { $("#zSl").max = m.shape[0] - 1; $("#zSl").value = Math.floor((m.shape[0] - 1) / 2); }
+  $("#cellCard").classList.add("hidden"); renderRoi();
+  show("explore");
+  await loadHistory();
+  loadFrame(true);
+  if (thenAnswer) applyAnswer(thenAnswer);
+}
+
+function renderRerun() {
+  const box = $("#rerun"), ms = (S.status && S.status.models) || [], m = S.cur;
+  const others = m && m.kind === "upload" ? ms.filter(x => x.key !== m.model) : [];
+  if (!others.length) { box.innerHTML = ""; return; }
+  box.innerHTML = others.map(o => `<button class="btn sm" data-rr="${esc(o.key)}" title="Segment the same images again with this model, to compare">Run with “${esc(o.label)}”</button>`).join(" ");
+  box.querySelectorAll("[data-rr]").forEach(b => b.onclick = async () => {
+    try {
+      const r = await J(`api/seqs/${m.id}/resegment`, {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({model: b.dataset.rr})});
+      toast(`Started: “${r.name}”. It appears under Sequences when ready.`); show("seqs");
+    } catch (e) { toast(e.message, true); }
+  });
+}
+
+// ---------------------------------------------------------------- viewer
+const img = $("#img"), stage = $("#stage"), vp = $("#vp"), ov = $("#ov");
+let loadSeq = 0;
+function frameUrl(t) {
+  const p = new URLSearchParams({view: S.zv, outlines: S.outlines ? 1 : 0, labels: 0});
+  if (S.hl && S.hl.frame === t) p.set("hl", S.hl.ids.join(","));
+  else if (S.follow != null) p.set("hl", String(S.follow));
+  if (S.divMap[t]) p.set("div", S.divMap[t].join(","));
+  if (S.sel && S.sel.t === t) p.set("sel", S.sel.id);
+  return withTok(`api/seqs/${S.cur.id}/frame/${t}.png?` + p.toString());
+}
+function loadFrame(first) {
+  if (!S.cur) return;
+  const my = ++loadSeq, t = S.t, im = new Image();
+  im.onload = () => {
+    if (my !== loadSeq) return;
+    img.src = im.src;
+    if (first || im.naturalWidth !== S.W || im.naturalHeight !== S.H) {
+      S.W = im.naturalWidth; S.H = im.naturalHeight; img.width = S.W; img.height = S.H;
+      ov.setAttribute("viewBox", `0 0 ${S.W} ${S.H}`); ov.setAttribute("width", S.W); ov.setAttribute("height", S.H);
+      fitView(true);
+    }
+    $("#vpMsg").classList.add("hidden");
+    drawLabels();
+    if (S.playing) setTimeout(stepPlay, 220);
+  };
+  im.onerror = () => { if (my === loadSeq) { $("#vpMsg").textContent = "Could not load this frame."; $("#vpMsg").classList.remove("hidden"); } };
+  im.src = frameUrl(t);
+  $("#fSl").value = t;
+  const nc = S.cur.cells_per_frame && S.cur.cells_per_frame[t - S.frames[0]];
+  $("#fTxt").textContent = `frame ${t} / ${S.frames[1]}` + (nc != null ? ` · ${nc} cells` : "");
+  let badge = "";
+  if (S.hl && S.hl.frame !== t) badge = `answer is on frame ${S.hl.frame}`;
+  else if (S.hl) badge = `answer: ${S.hl.ids.length} cell${S.hl.ids.length === 1 ? "" : "s"}`;
+  if (S.follow != null) badge = `following cell ${S.follow}`;
+  $("#vpBadge").textContent = badge; $("#vpBadge").classList.toggle("hidden", !badge);
+  // prefetch next frame
+  if (t < S.frames[1]) { const n = new Image(); n.src = frameUrl(t + 1); }
+}
+function applyTransform() {
+  const s = S.fit * S.zoom;
+  stage.style.transform = `translate(${S.tx}px,${S.ty}px) scale(${s})`;
+  $("#zTxt").textContent = Math.round(S.zoom * 100) + "%";
+  $("#gRoi").querySelectorAll("rect").forEach(r => r.setAttribute("stroke-width", 2 / s));
+  drawLabels();
+}
+function drawLabels() {
+  const g = $("#gLab"), s = S.fit * S.zoom;
+  if (!S.hl || S.hl.frame !== S.t || !S.hl.cells) { g.innerHTML = ""; return; }
+  const fs = 11 / s, ph = 4 / s, h = fs + 2 * ph;
+  g.innerHTML = S.hl.cells.filter(c => c.cx != null).slice(0, 80).map(c => {
+    const t = String(c.id), w = (t.length * 0.62 * fs) + 2 * ph;
+    return `<g transform="translate(${c.cx},${c.cy})"><rect x="${-w / 2}" y="${-h / 2}" width="${w}" height="${h}" rx="${3 / s}" fill="rgba(18,16,40,.82)"/>` +
+           `<text x="0" y="${fs * 0.36}" font-size="${fs}" text-anchor="middle" fill="#fff" font-family="ui-monospace,Menlo,monospace">${t}</text></g>`;
+  }).join("");
+}
+function fitView(reset) {
+  const r = vp.getBoundingClientRect();
+  if (!S.W || !r.width) return;
+  S.fit = Math.min(r.width / S.W, r.height / S.H);
+  if (reset) { S.zoom = 1; S.tx = (r.width - S.W * S.fit) / 2; S.ty = (r.height - S.H * S.fit) / 2; }
+  applyTransform();
+}
+function zoomAt(f, cx, cy) {
+  const r = vp.getBoundingClientRect(); cx = cx ?? r.width / 2; cy = cy ?? r.height / 2;
+  const s0 = S.fit * S.zoom, z = Math.min(Math.max(S.zoom * f, 0.5), 20), s1 = S.fit * z;
+  S.tx = cx - (cx - S.tx) * s1 / s0; S.ty = cy - (cy - S.ty) * s1 / s0; S.zoom = z; applyTransform();
+}
+const toImg = e => { const r = vp.getBoundingClientRect(), s = S.fit * S.zoom; return [(e.clientX - r.left - S.tx) / s, (e.clientY - r.top - S.ty) / s]; };
+vp.addEventListener("wheel", e => { e.preventDefault(); const r = vp.getBoundingClientRect(); zoomAt(e.deltaY < 0 ? 1.15 : 1 / 1.15, e.clientX - r.left, e.clientY - r.top); }, {passive: false});
+let drag = null;
+vp.addEventListener("mousedown", e => {
+  if (e.button !== 0 || !S.W) return;
+  e.preventDefault();                       // no native image drag / text selection
+  if (S.mode === "box") { const [x, y] = toImg(e); drag = {box: true, x0: x, y0: y}; drawBox(x, y, x, y); return; }
+  drag = {x: e.clientX, y: e.clientY, tx: S.tx, ty: S.ty, moved: false}; vp.classList.add("drag");
+});
+window.addEventListener("mousemove", e => {
+  if (!drag) return;
+  if (drag.box) { const [x, y] = toImg(e); drawBox(drag.x0, drag.y0, x, y); return; }
+  const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+  if (Math.abs(dx) + Math.abs(dy) > 3) drag.moved = true;
+  S.tx = drag.tx + dx; S.ty = drag.ty + dy; applyTransform();
+});
+window.addEventListener("mouseup", e => {
+  if (!drag) return;
+  const d = drag; drag = null; vp.classList.remove("drag");
+  if (d.box) {
+    const [x, y] = toImg(e), cl = (v, m) => Math.round(Math.min(Math.max(v, 0), m - 1));
+    const b = [cl(Math.min(d.x0, x), S.W), cl(Math.min(d.y0, y), S.H), cl(Math.max(d.x0, x), S.W), cl(Math.max(d.y0, y), S.H)];
+    if (b[2] - b[0] < 4 || b[3] - b[1] < 4) { S.roi = null; renderRoi(); return; }
+    S.roi = {box: b, t: S.t}; renderRoi(); setMode("pan");
+    const q = $("#q"), add = `inside the box [${b.join(", ")}] in frame ${S.t}`;
+    q.value = q.value.trim() ? q.value.trim().replace(/[?.]$/, "") + " " + add + "?" : "How many cells are " + add + "?";
+    autosize(); q.focus();
+    return;
+  }
+  if (!d.moved && e.target.closest("#vp")) pickCell(...toImg(e));
+});
+function drawBox(x0, y0, x1, y1) {
+  $("#gRoi").innerHTML = `<rect x="${Math.min(x0, x1)}" y="${Math.min(y0, y1)}" width="${Math.abs(x1 - x0)}" height="${Math.abs(y1 - y0)}" fill="rgba(122,96,230,.15)" stroke="#a48cff" stroke-width="${2 / (S.fit * S.zoom)}" stroke-dasharray="6 4" vector-effect="non-scaling-stroke"/>`;
+}
+function renderRoi() {
+  const c = $("#roiChip");
+  if (!S.roi) { c.classList.add("hidden"); $("#gRoi").innerHTML = ""; return; }
+  const b = S.roi.box; drawBox(b[0], b[1], b[2], b[3]);
+  c.innerHTML = `<span class="chip">Box [${b.join(", ")}] · frame ${S.roi.t} <span style="cursor:pointer;margin-left:4px" id="roiX">✕</span></span>`;
+  c.classList.remove("hidden"); $("#roiX").onclick = () => { S.roi = null; renderRoi(); };
+}
+function setMode(m) { S.mode = m; $("#tPan").classList.toggle("on", m === "pan"); $("#tBox").classList.toggle("on", m === "box"); vp.classList.toggle("box", m === "box");
+  $("#vpHint").textContent = m === "box" ? "Drag to draw a box around the cells you mean" : "Scroll to zoom · drag to move · click a cell"; }
+$("#tPan").onclick = () => setMode("pan"); $("#tBox").onclick = () => setMode("box");
+$("#zIn").onclick = () => zoomAt(1.4); $("#zOut").onclick = () => zoomAt(1 / 1.4); $("#zReset").onclick = () => fitView(true);
+$("#tOut").onclick = () => { S.outlines = !S.outlines; $("#tOut").classList.toggle("on", S.outlines); loadFrame(); };
+$("#vMode").onchange = () => { const z = $("#vMode").value === "z"; $("#zSl").classList.toggle("hidden", !z); $("#zLab").classList.toggle("hidden", !z); S.zv = z ? $("#zSl").value : "max"; zLabel(); loadFrame(); };
+$("#zSl").oninput = () => { S.zv = $("#zSl").value; zLabel(); loadFrame(); };
+const zLabel = () => { $("#zLab").textContent = "slice " + $("#zSl").value + " / " + $("#zSl").max; };
+function goFrame(t) { S.t = Math.min(Math.max(t, S.frames[0]), S.frames[1]); loadFrame(); if (S.follow != null) refreshFollow(); }
+$("#fSl").oninput = () => goFrame(+$("#fSl").value);
+$("#fPrev").onclick = () => goFrame(S.t - 1); $("#fNext").onclick = () => goFrame(S.t + 1);
+$("#fPlay").onclick = () => { S.playing = !S.playing; $("#fPlay").textContent = S.playing ? "❚❚ Pause" : "▶ Play"; if (S.playing) { if (S.t >= S.frames[1]) S.t = S.frames[0] - 1; stepPlay(); } };
+function stepPlay() { if (!S.playing) return; if (S.t >= S.frames[1]) { S.playing = false; $("#fPlay").textContent = "▶ Play"; return; } goFrame(S.t + 1); }
+document.addEventListener("keydown", e => {
+  if (S.view !== "explore" || !S.cur || /input|textarea|select/i.test(document.activeElement.tagName)) return;
+  if (e.key === "ArrowLeft") goFrame(S.t - 1); if (e.key === "ArrowRight") goFrame(S.t + 1);
+});
+window.addEventListener("resize", () => { if (S.view === "explore") fitView(false); });
+$("#dl").onchange = () => { const v = $("#dl").value; $("#dl").value = ""; if (v && S.cur) location.href = withTok(`api/seqs/${S.cur.id}/${v}`); };
+
+// ---------------------------------------------------------------- cell details
+const fmt = (v, d = 2) => v == null || Number.isNaN(v) ? "—" : (Math.abs(v) >= 1000 ? Math.round(v).toLocaleString() : (+v).toFixed(d));
+async function pickCell(x, y, cid) {
+  if (!S.cur) return;
+  const p = new URLSearchParams({t: S.t, x: x || 0, y: y || 0, view: S.zv}); if (cid != null) p.set("cid", cid);
+  let r; try { r = await J(`api/seqs/${S.cur.id}/cell?` + p); } catch (e) { toast(e.message, true); return; }
+  if (!r.cell) { S.sel = null; $("#cellCard").classList.add("hidden"); loadFrame(); return; }
+  S.sel = {t: S.t, id: r.cell.id}; renderCell(r.cell); loadFrame();
+}
+function renderCell(c) {
+  const d3 = c.ndim === 3, tr = c.track || {};
+  const items = d3 ? [["Volume", fmt(c.volume, 1) + " µm³"], ["Sphericity", fmt(c.sphericity)], ["Elongation", fmt(c.aspect_ratio)], ["Irregularity", fmt(c.irregularity)],
+                      ["Surface", fmt(c.surface_area, 1) + " µm²"], ["Brightness", fmt(c.mean_intensity, 1)], ["Position x, y", fmt(c.cx, 0) + ", " + fmt(c.cy, 0)], ["Depth (slice)", fmt(c.cz, 1)]]
+                   : [["Area", fmt(c.area, 0) + " px²"], ["Roundness", fmt(c.circularity)], ["Elongation", fmt(c.aspect_ratio)], ["Irregularity", fmt(c.irregularity)],
+                      ["Perimeter", fmt(c.perimeter, 1) + " px"], ["Brightness", fmt(c.mean_intensity, 1)], ["Position x, y", fmt(c.cx, 0) + ", " + fmt(c.cy, 0)], ["Solidity", fmt(c.solidity)]];
+  const kids = tr.daughters || [];
+  const lin = `<div class="lin"><span class="muted">Lineage:</span>
+    ${tr.parent ? `<span class="node" data-cell="${tr.parent}" data-t="${tr.begin - 1}" title="go to the parent">cell ${tr.parent}</span><span>→</span>` : `<span class="muted small">no parent seen</span><span>→</span>`}
+    <span class="node" style="background:#fff7cc;border-color:#f2d75c;color:#7a6200">cell ${c.id}</span>
+    ${kids.length ? `<span>→</span>` + kids.map(k => `<span class="node" data-cell="${k}" data-t="${tr.end + 1}" title="go to the daughter">cell ${k}</span>`).join("") : ""}
+    <span class="small muted">· tracked in frames ${tr.begin ?? "?"}–${tr.end ?? "?"}${kids.length ? ", then splits in two" : ""}</span></div>`;
+  $("#cellCard").innerHTML = `<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><b style="font-size:15px">Cell ${c.id}</b><span class="pill">frame ${c.frame}</span>
+      <span style="flex:1"></span>
+      <button class="btn sm ${S.follow === c.id ? "on" : ""}" id="cFollow">${S.follow === c.id ? "Stop following" : "Follow over time"}</button>
+      ${kids.length ? `<button class="btn sm" id="cSplit">Show its split</button>` : ""}
+      <button class="btn sm" id="cAsk">Ask about it</button><button class="btn sm ghost" id="cClose">✕</button></div>
+    <div class="kv">${items.map(([k, v]) => `<div><span>${k}</span><b>${v}</b></div>`).join("")}</div>${lin}`;
+  $("#cellCard").classList.remove("hidden");
+  $("#cClose").onclick = () => { S.sel = null; S.follow = null; $("#cellCard").classList.add("hidden"); loadFrame(); };
+  $("#cFollow").onclick = () => { S.follow = S.follow === c.id ? null : c.id; S.hl = S.follow != null ? null : S.hl; renderCell(c); loadFrame(); };
+  $("#cAsk").onclick = () => { const q = $("#q"); q.value = (q.value.trim() ? q.value.trim() + " " : "Tell me about ") + `cell ${c.id} in frame ${c.frame}`; autosize(); q.focus(); };
+  if ($("#cSplit")) $("#cSplit").onclick = () => { S.divMap = {}; S.divMap[tr.end] = [c.id]; S.divMap[tr.end + 1] = kids; S.hl = null; S.follow = null; goFrame(tr.end + 1); };
+  document.querySelectorAll("#cellCard [data-cell]").forEach(n => n.onclick = () => { goFrame(+n.dataset.t); pickCell(0, 0, +n.dataset.cell); });
+}
+function refreshFollow() { if (S.sel && S.follow != null) { S.sel = {t: S.t, id: S.follow}; pickCell(0, 0, S.follow); } }
+
+// ---------------------------------------------------------------- chat
+function examples() {
+  const m = S.cur, a = S.frames[0], b = S.frames[1], mid = Math.round((a + b) / 2), q = Math.round(a + (b - a) / 4);
+  return m.ndim === 3 ? [
+    `Which 2 cells are the largest in frame ${mid}?`,
+    `How many cells are in the deeper half of frame ${q}?`,
+    `Which cells in frame ${mid} are bigger than the median cell?`,
+    `Which cell is the most spherical in frame ${q}?`,
+    `List the cell divisions between frames ${a} and ${b}.`,
+  ] : [
+    `Which 3 cells are the largest in frame ${mid}?`,
+    `How many cells are in the upper half of frame ${q}?`,
+    `Which cells in frame ${mid} are about to divide?`,
+    `Which cell is the roundest in the left half of frame ${q}?`,
+    `List the cell divisions between frames ${a} and ${b}.`,
+  ];
+}
+let HIST = [];
+async function loadHistory() {
+  try { HIST = (await J(`api/seqs/${S.cur.id}/history`)).items; } catch (e) { HIST = []; }
+  renderMsgs();
+}
+function renderMsgs(pending) {
+  const box = $("#msgs");
+  let h = "";
+  if (!HIST.length && !pending) {
+    h = `<div class="am" style="max-width:100%"><div class="big">Ask anything about the cells</div><div class="small muted">Sizes, shapes, positions, counts, depth (3D) and divisions over time. The answer is drawn on the image. Try one:</div>
+      <div class="ex-q">${examples().map(e => `<button data-ex="${esc(e)}">${esc(e)}</button>`).join("")}</div>
+      <div class="small muted" style="margin-top:8px">Tip: use <b>Box</b> to draw a region, or click a cell and choose <b>Ask about it</b>.</div></div>`;
+  }
+  for (const r of HIST) h += `<div class="um">${esc(r.question)}</div>` + answerHtml(r);
+  if (pending) h += `<div class="um">${esc(pending)}</div><div class="am"><span class="typing"><i></i><i></i><i></i></span> <span class="small muted">the assistant is looking it up…</span></div>`;
+  box.innerHTML = h;
+  box.scrollTop = box.scrollHeight;
+  box.querySelectorAll("[data-ex]").forEach(b => b.onclick = () => { $("#q").value = b.dataset.ex; autosize(); send(); });
+  box.querySelectorAll("[data-show]").forEach(b => b.onclick = () => applyAnswer(HIST.find(r => r.id === b.dataset.show)));
+  box.querySelectorAll("[data-cid]").forEach(b => b.onclick = () => { const r = HIST.find(x => x.id === b.dataset.rid); applyAnswer(r, true); pickCell(0, 0, +b.dataset.cid); });
+  box.querySelectorAll("[data-div]").forEach(b => b.onclick = () => { const [p, f, e] = b.dataset.div.split(":").map(Number); const r = HIST.find(x => x.id === b.dataset.rid); applyAnswer(r, true); goFrame(f); });
+}
+function traceText(s) {
+  const a = s.args || {}, n = s.tool;
+  const nice = {set_frame: `go to frame ${a.t}`, select_all_cells: "select all cells", count: "count the selected cells", list_features: "list the measurements",
+                rank: `keep the ${a.k} ${a.order === "asc" ? "smallest" : "largest"} by ${a.feature}`, get_cell: `look at cell ${a.cell_id}`,
+                divisions: `find divisions in frames ${a.start}–${a.end}`, track: "look up the tracks", submit_answer: "give the answer"}[n];
+  if (n === "filter") {
+    const c = (a.conditions || []).map(c => `${c.feature} ${c.op} ${c.value}`);
+    if (a.region) c.push("region " + a.region); if (a.roi) c.push("box [" + a.roi.join(", ") + "]");
+    return "filter: " + (c.join(", ") || "—");
+  }
+  return nice || n;
+}
+function answerHtml(r) {
+  const meta = `<div class="meta"><span>${r.seconds}s</span><span>${r.steps} steps</span><span>${esc((r.planner || "").split("/").pop())}</span></div>`;
+  const trace = r.trace && r.trace.length ? `<details><summary>What the assistant did (${r.trace.length} steps)</summary><ol class="trace">${r.trace.map(s =>
+      `<li><b>${esc(traceText(s))}</b><code class="o">${esc(s.tool)}(${esc(JSON.stringify(s.args || {}))}) → ${esc((s.out || "").slice(0, 220))}</code></li>`).join("")}</ol></details>` : "";
+  if (r.error && !r.answer) return `<div class="am err"><div class="big">Something went wrong</div><div class="small">${esc(r.error)}</div>${trace}${meta}</div>`;
+  const a = r.answer;
+  if (!a) return `<div class="am"><div class="big">I could not finish this question</div><div class="small muted">The assistant did not reach an answer. Try naming the frame and what to measure, e.g. "Which 3 cells are the largest in frame 10?"</div>${trace}${meta}</div>`;
+  let big, chips = "";
+  if (a.divisions && a.divisions.length) {
+    big = `${a.divisions.length} cell division${a.divisions.length === 1 ? "" : "s"} found`;
+    chips = a.divisions.slice(0, 60).map(d => `<span class="chip o" data-rid="${r.id}" data-div="${d.parent}:${d.frame}:${d.last_frame}">cell ${d.parent} → ${d.daughters.join(" + ")} · frame ${d.frame}</span>`).join("");
+  } else {
+    const n = a.cell_ids.length, cnt = a.count, k = n || cnt;
+    big = `${k} cell${k === 1 ? "" : "s"} in frame ${a.frame}` + (n && cnt !== n ? ` (count: ${cnt})` : "");
+    chips = a.cells.slice(0, 40).map(c => `<span class="chip g" data-rid="${r.id}" data-cid="${c.id}" title="size ${c.size} ${a.size_unit.replace("^2", "²").replace("^3", "³").replace("um", "µm")}">cell ${c.id}</span>`).join("") + (a.cells.length > 40 ? `<span class="small muted">+${a.cells.length - 40} more</span>` : "");
+  }
+  return `<div class="am"><div class="big">${esc(big)}</div>${a.note ? `<div class="note">“${esc(a.note)}”</div>` : ""}
+    ${chips ? `<div class="chips">${chips}</div>` : ""}
+    <button class="btn sm" data-show="${r.id}">Show on image</button>${trace}${meta}</div>`;
+}
+function applyAnswer(r, quiet) {
+  if (!r || !r.answer) return;
+  const a = r.answer;
+  S.follow = null; S.divMap = {};
+  (a.divisions || []).forEach(d => { (S.divMap[d.last_frame] ||= []).push(d.parent); (S.divMap[d.frame] ||= []).push(...d.daughters); });
+  S.hl = a.cell_ids && a.cell_ids.length ? {frame: a.frame, ids: a.cell_ids, cells: a.cells} : null;
+  const tgt = S.hl ? a.frame : (a.divisions && a.divisions.length ? a.divisions[0].frame : a.frame);
+  goFrame(tgt);
+}
+async function send() {
+  const q = $("#q").value.trim();
+  if (!q || S.busy || !S.cur) return;
+  S.busy = true; $("#send").disabled = true; $("#q").value = ""; autosize();
+  renderMsgs(q);
+  try {
+    const r = await J(`api/seqs/${S.cur.id}/ask`, {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({question: q, planner: S.planner})});
+    HIST.push(r); renderMsgs(); applyAnswer(r);
+  } catch (e) { renderMsgs(); toast(e.message, true); $("#q").value = q; autosize(); }
+  S.busy = false; $("#send").disabled = false;
+}
+$("#send").onclick = send;
+const autosize = () => { const q = $("#q"); q.style.height = "auto"; q.style.height = Math.min(q.scrollHeight, 140) + "px"; };
+$("#q").oninput = autosize;
+$("#q").onkeydown = e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } };
+
+// ---------------------------------------------------------------- results
+async function loadResults() {
+  let items = [];
+  try { items = (await J("api/history")).items; } catch (e) { toast(e.message, true); }
+  $("#resEmpty").classList.toggle("hidden", items.length > 0);
+  $("#resBody").innerHTML = items.map((r, i) => {
+    const a = r.answer, d = new Date(r.time * 1000);
+    const ans = r.error && !a ? `<span style="color:var(--bad)">error</span>` : !a ? `<span class="muted">no answer</span>` :
+      (a.divisions && a.divisions.length ? `${a.divisions.length} divisions` : `${a.count} cell${a.count === 1 ? "" : "s"} · frame ${a.frame}`);
+    return `<tr class="click" data-i="${i}"><td class="small muted">${d.toLocaleDateString()} ${d.toLocaleTimeString([], {hour: "2-digit", minute: "2-digit"})}</td>
+      <td>${esc(r.sequence_name)}<div class="small muted">${esc(r.backend_label)}</div></td><td>${esc(r.question)}</td><td>${ans}</td><td class="small muted">${r.seconds}s · ${r.steps} steps</td></tr>`;
+  }).join("");
+  document.querySelectorAll("#resBody tr").forEach(tr => tr.onclick = async () => {
+    const r = items[+tr.dataset.i];
+    await openSeq(r.sequence);
+    const full = HIST.find(x => x.id === r.id); if (full) applyAnswer(full);
+  });
+}
+
+// ---------------------------------------------------------------- start
+loadStatus(); setInterval(loadStatus, 30000);
+loadSeqs();
+</script>
+</body>
+</html>
