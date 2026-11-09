@@ -137,7 +137,7 @@ train_joint() {
   if [ ! -f "$M" ] && [ -f "$BACKUP/cpsam_ft_joint" ]; then
     mkdir -p "$(dirname "$M")"; cp "$BACKUP/cpsam_ft_joint" "$M"; log "restored joint generalist from $BACKUP"
   fi
-  $PY train_cpsam --mode joint --epochs 100 --lr 1e-5 --weight-decay 0.1 "${DS[@]}"
+  $PY train_cpsam --mode joint --epochs "${EPOCHS:-100}" --lr 1e-5 --weight-decay 0.1 "${DS[@]}"
   mkdir -p "$BACKUP"
   if [ -f "$M" ] && ! cmp -s "$M" "$BACKUP/cpsam_ft_joint" 2>/dev/null; then
     cp "$M" "$BACKUP/cpsam_ft_joint"; log "joint generalist backed up -> $BACKUP/cpsam_ft_joint"
