@@ -33,7 +33,7 @@
 set -euo pipefail
 
 # ---------------------------------------------------------------- paths
-PROJECT=/mnt/projects/sutravek_project/Ali_belhrak/SI_Project
+PROJECT=${PROJECT:-/mnt/projects/sutravek_project/Ali_belhrak/SI_Project}
 # 2D and 3D roots, separated by ':' (each dataset is found inside its root)
 export CTC_DATA=${CTC_DATA:-$PROJECT/CTC_Data/CTC_Data/2D:$PROJECT/CTC_Data/CTC_Data/3D}
 export CTC_OUT=${CTC_OUT:-$PROJECT/CTC_Data/Thesis}
@@ -42,6 +42,7 @@ CODE_DIR=${CODE_DIR:-${SLURM_SUBMIT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")" &
 # (module python/3.12.3 + cuda/12.9, venv .venv_cpsam). Override with VENV=... if needed.
 VENV=${VENV:-$PROJECT/CTC_Data/Models/Cellpose-SAM/ZeroShot/.venv_cpsam}
 PY="$VENV/bin/python $CODE_DIR/ctc_nl_pipeline.py"
+DS=(); [ -n "${DATASETS:-}" ] && DS=(--datasets $DATASETS)   # e.g. DATASETS="Fluo-N2DL-HeLa" restricts a stage to those datasets
 
 # caches on project storage (home quotas are small)
 export HF_HOME=${HF_HOME:-$PROJECT/.cache/huggingface}
@@ -108,7 +109,7 @@ PYEOF
 }
 
 selftest()          { $PY selftest --out "$CTC_OUT/selftest"; }
-prepare()           { $PY prepare; }
+prepare()           { $PY prepare "${DS[@]}"; }
 # ---- Segmentation: ONE generalist Cellpose-SAM trained on seq 01 of ALL datasets ----
 train_generalist()  {
   # reuse the backed-up generalist if Thesis/models was lost, instead of retraining
@@ -136,7 +137,7 @@ train_joint() {
   if [ ! -f "$M" ] && [ -f "$BACKUP/cpsam_ft_joint" ]; then
     mkdir -p "$(dirname "$M")"; cp "$BACKUP/cpsam_ft_joint" "$M"; log "restored joint generalist from $BACKUP"
   fi
-  $PY train_cpsam --mode joint --epochs 100 --lr 1e-5 --weight-decay 0.1
+  $PY train_cpsam --mode joint --epochs 100 --lr 1e-5 --weight-decay 0.1 "${DS[@]}"
   mkdir -p "$BACKUP"
   if [ -f "$M" ] && ! cmp -s "$M" "$BACKUP/cpsam_ft_joint" 2>/dev/null; then
     cp "$M" "$BACKUP/cpsam_ft_joint"; log "joint generalist backed up -> $BACKUP/cpsam_ft_joint"
@@ -144,9 +145,9 @@ train_joint() {
 }
 # --skip-existing: datasets already segmented (e.g. the 2D ones) are kept, only new ones are run
 segment_generalist(){ $PY segment --backend cpsam_pooled --skip-existing; }   # on 3D = zero-shot transfer of the 2D model
-segment_joint()     { $PY segment --backend cpsam_joint --skip-existing; }
-segment_oracle()    { $PY segment --backend oracle --skip-existing; }
-eval_seg()          { $PY eval_seg --official --backends oracle cpsam_pooled cpsam_joint; }   # missing backends are skipped
+segment_joint()     { $PY segment --backend cpsam_joint --skip-existing "${DS[@]}"; }
+segment_oracle()    { $PY segment --backend oracle --skip-existing "${DS[@]}"; }
+eval_seg()          { $PY eval_seg --official --backends oracle cpsam_pooled cpsam_joint "${DS[@]}"; }   # missing backends are skipped
 train_cls() {       # 2D-only classifier: kept if already trained (FORCE_CLS=1 to retrain)
   if [ -f "$CTC_OUT/models/attr_vit.pt" ] && [ "${FORCE_CLS:-0}" != "1" ]; then
     log "keeping existing classifier models/attr_vit.pt"; return 0; fi
